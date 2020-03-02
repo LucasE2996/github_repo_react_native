@@ -3,7 +3,19 @@ import {Keyboard} from 'react-native';
 
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import api from '../../services/api';
-import {Container, Form, Input, SubmitButton} from './styles';
+import {
+  Container,
+  Form,
+  Input,
+  SubmitButton,
+  List,
+  User,
+  Bio,
+  Avatar,
+  Name,
+  ProfileButton,
+  ProfileButtonText,
+} from './styles';
 
 const Main = () => {
   const [newUser, setNewUser] = useState('');
@@ -18,6 +30,8 @@ const Main = () => {
       bio: response.data.bio,
       avatar: response.data.avatar_url,
     };
+
+    console.log(data);
 
     setUsers([...users, data]);
     setNewUser('');
@@ -40,6 +54,22 @@ const Main = () => {
           <Icon name="add" size={14} color="#FFF" />
         </SubmitButton>
       </Form>
+
+      <List
+        data={users}
+        keyExtractor={user => user.login}
+        renderItem={({item}) => (
+          <User>
+            <Avatar source={{uri: item.avatar}} />
+            <Name>{item.name}</Name>
+            <Bio>{item.bio}</Bio>
+
+            <ProfileButton onPress={() => {}}>
+              <ProfileButtonText>Ver Perfil</ProfileButtonText>
+            </ProfileButton>
+          </User>
+        )}
+      />
     </Container>
   );
 };
