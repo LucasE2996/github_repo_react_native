@@ -1,5 +1,6 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {Keyboard, ActivityIndicator} from 'react-native';
+import AsyncStorage from '@react-native-community/async-storage';
 
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import api from '../../services/api';
@@ -21,6 +22,35 @@ const Main = () => {
   const [newUser, setNewUser] = useState('');
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
+
+  const getUsers = async () => {
+    const usersFromCache = await AsyncStorage.getItem('users');
+
+    if (usersFromCache) {
+      console.log('getUsers', JSON.parse(usersFromCache));
+      setUsers(JSON.parse(usersFromCache));
+    }
+  };
+
+  const updateUsers = async () => {
+    await AsyncStorage.setItem('users', JSON.stringify(users));
+    console.log('update', users);
+  };
+
+  const deleteAllUsers = async () => {
+    await AsyncStorage.removeItem('users');
+  };
+
+  // equivalent to componentDidMount
+  useEffect(() => {
+    getUsers();
+    // deleteAllUsers();
+  }, []);
+
+  // equivalent to componentDidUpdate
+  useEffect(() => {
+    updateUsers();
+  }, [users]);
 
   const handleAddUser = async () => {
     setLoading(true);
