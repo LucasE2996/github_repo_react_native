@@ -16,6 +16,7 @@ import {
   Title,
   Author,
   Content,
+  ErrorText,
 } from './styles';
 
 const User = ({route}) => {
@@ -23,21 +24,54 @@ const User = ({route}) => {
   const {user} = route.params;
   const [stars, setStars] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingEndPage, setLoadingEndPage] = useState(false);
+  const [page, setPage] = useState(1);
+  const [reachEnd, setReachEnd] = useState(false);
+  const [errorPage, setErrorPage] = useState(false);
 
   const getStars = async () => {
-    const response = await api.get(`/users/${user.login}/starred`);
-
-    if (response) {
-      setStars(response.data);
+    console.log('page', page);
+    try {
+      const response = await api.get(`/users/${user.login}/starred`, {
+        params: {
+          page,
+          per_page: 20,
+        },
+      });
+      if (response) {
+        console.log(response.data);
+        if (response.data.length < 1) {
+          setReachEnd(true);
+        } else {
+          setStars([...stars, ...response.data]);
+          setPage(prev => {
+            const newValue = prev + 1;
+            return newValue;
+          });
+        }
+      }
+    } catch (err) {
+      console.log(err);
+      setErrorPage(true);
     }
 
     setLoading(false);
+    setLoadingEndPage(false);
   };
 
   // equivalent to componentDidMount
   useEffect(() => {
     getStars();
   }, []);
+
+  const loadMore = () => {
+    if (reachEnd || loadingEndPage) {
+      return;
+    }
+    console.log('LOAD MORE DATA');
+    setLoadingEndPage(true);
+    getStars();
+  };
 
   return (
     <Container>
@@ -47,24 +81,33 @@ const User = ({route}) => {
         <Bio>{user.bio}</Bio>
       </Header>
 
-      {loading ? (
+      {loading || errorPage ? (
         <Content>
-          <ActivityIndicator color="#333" size={50} />
+          {loading ? (
+            <ActivityIndicator color="#333" size={50} />
+          ) : (
+            <ErrorText>Ops... algo deu errado</ErrorText>
+          )}
         </Content>
       ) : (
-        <Stars
-          data={stars}
-          keyExtractor={star => String(star.id)}
-          renderItem={({item}) => (
-            <Starred>
-              <OwnerAvatar source={{uri: item.owner.avatar_url}} />
-              <Info>
-                <Title>{item.name}</Title>
-                <Author>{item.owner.login}</Author>
-              </Info>
-            </Starred>
-          )}
-        />
+        <>
+          <Stars
+            onEndReachedThreshold={0.1} // Carrega mais itens quando chegar em 10% do fim
+            onEndReached={loadMore} // Função que carrega mais itens
+            data={stars}
+            keyExtractor={star => String(star.id)}
+            renderItem={({item}) => (
+              <Starred>
+                <OwnerAvatar source={{uri: item.owner.avatar_url}} />
+                <Info>
+                  <Title>{item.name}</Title>
+                  <Author>{item.owner.login}</Author>
+                </Info>
+              </Starred>
+            )}
+          />
+          {loadingEndPage && <ActivityIndicator color="#333" size={30} />}
+        </>
       )}
     </Container>
   );

@@ -28,14 +28,12 @@ const Main = ({navigation}) => {
     const usersFromCache = await AsyncStorage.getItem('users');
 
     if (usersFromCache) {
-      console.log('getUsers', JSON.parse(usersFromCache));
       setUsers(JSON.parse(usersFromCache));
     }
   };
 
   const updateUsers = async () => {
     await AsyncStorage.setItem('users', JSON.stringify(users));
-    console.log('update', users);
   };
 
   const deleteAllUsers = async () => {
@@ -63,8 +61,6 @@ const Main = ({navigation}) => {
       bio: response.data.bio,
       avatar: response.data.avatar_url,
     };
-
-    console.log(data);
 
     setUsers([...users, data]);
     setNewUser('');

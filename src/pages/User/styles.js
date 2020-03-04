@@ -81,3 +81,8 @@ export const Content = styled.View`
   align-items: center;
   height: 50%;
 `;
+
+export const ErrorText = styled.Text`
+  text-align: center;
+  color: #ddd;
+`;
