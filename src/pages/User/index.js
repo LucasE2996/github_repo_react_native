@@ -28,12 +28,14 @@ const User = ({route}) => {
   const [page, setPage] = useState(1);
   const [reachEnd, setReachEnd] = useState(false);
   const [errorPage, setErrorPage] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
-  const getStars = async () => {
+  const getStars = async (newPage, resetData) => {
+    console.log(`getStars; page: ${page}`);
     try {
       const response = await api.get(`/users/${user.login}/starred`, {
         params: {
-          page,
+          page: newPage || page,
           per_page: 20,
         },
       });
@@ -41,7 +43,7 @@ const User = ({route}) => {
         if (response.data.length < 1) {
           setReachEnd(true);
         } else {
-          setStars([...stars, ...response.data]);
+          setStars(resetData ? response.data : [...stars, ...response.data]);
           setPage(prev => {
             const newValue = prev + 1;
             return newValue;
@@ -49,6 +51,7 @@ const User = ({route}) => {
         }
       }
     } catch (err) {
+      console.error(err);
       setErrorPage(true);
     }
 
@@ -63,10 +66,22 @@ const User = ({route}) => {
 
   const loadMore = () => {
     if (reachEnd || loadingEndPage) {
+      console.log('deny loadMore');
       return;
     }
+    console.log('loadMore');
     setLoadingEndPage(true);
     getStars();
+  };
+
+  const refreshList = () => {
+    setRefreshing(true);
+    setPage(1);
+
+    setTimeout(() => {
+      getStars(1, true);
+      setRefreshing(false);
+    }, 500);
   };
 
   return (
@@ -88,7 +103,9 @@ const User = ({route}) => {
       ) : (
         <>
           <Stars
-            onEndReachedThreshold={0.1} // Carrega mais itens quando chegar em 10% do fim
+            onRefresh={refreshList} // Função dispara quando o usuário arrasta a lista pra baixo
+            refreshing={refreshing} // Variável que armazena um estado true/false que representa se a lista está atualizando
+            onEndReachedThreshold={0.01} // Carrega mais itens quando chegar em 10% do fim
             onEndReached={loadMore} // Função que carrega mais itens
             data={stars}
             keyExtractor={star => String(star.id)}
