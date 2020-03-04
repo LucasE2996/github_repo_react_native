@@ -30,7 +30,6 @@ const User = ({route}) => {
   const [errorPage, setErrorPage] = useState(false);
 
   const getStars = async () => {
-    console.log('page', page);
     try {
       const response = await api.get(`/users/${user.login}/starred`, {
         params: {
@@ -39,7 +38,6 @@ const User = ({route}) => {
         },
       });
       if (response) {
-        console.log(response.data);
         if (response.data.length < 1) {
           setReachEnd(true);
         } else {
@@ -51,7 +49,6 @@ const User = ({route}) => {
         }
       }
     } catch (err) {
-      console.log(err);
       setErrorPage(true);
     }
 
@@ -68,7 +65,6 @@ const User = ({route}) => {
     if (reachEnd || loadingEndPage) {
       return;
     }
-    console.log('LOAD MORE DATA');
     setLoadingEndPage(true);
     getStars();
   };
