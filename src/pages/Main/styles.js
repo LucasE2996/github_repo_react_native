@@ -21,7 +21,7 @@ export const Input = styled.TextInput.attrs({
   background: #ddd;
   border-radius: 4px;
   padding: 0 15px;
-  border: 1px solid #ddd;
+  border: 1px solid ${props => (props.error ? 'red' : '#ddd')};
 `;
 
 export const SubmitButton = styled(RectButton)`

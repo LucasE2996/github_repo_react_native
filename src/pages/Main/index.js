@@ -23,6 +23,8 @@ const Main = ({navigation}) => {
   const [newUser, setNewUser] = useState('');
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false);
+  const [blockButton, setBlockButton] = useState(true);
 
   const getUsers = async () => {
     const usersFromCache = await AsyncStorage.getItem('users');
@@ -51,19 +53,39 @@ const Main = ({navigation}) => {
     updateUsers();
   }, [users]);
 
+  useEffect(() => {
+    if (newUser === '') {
+      setBlockButton(true);
+      setError(false);
+    }
+    if (newUser.length > 1) {
+      setBlockButton(false);
+    }
+  }, [newUser]);
+
   const handleAddUser = async () => {
+    if (blockButton) {
+      return;
+    }
+
     setLoading(true);
-    const response = await api.get(`/users/${newUser}`);
 
-    const data = {
-      name: response.data.name,
-      login: response.data.login,
-      bio: response.data.bio,
-      avatar: response.data.avatar_url,
-    };
+    try {
+      const response = await api.get(`/users/${newUser}`);
 
-    setUsers([...users, data]);
-    setNewUser('');
+      const data = {
+        name: response.data.name,
+        login: response.data.login,
+        bio: response.data.bio,
+        avatar: response.data.avatar_url,
+      };
+
+      setUsers([...users, data]);
+      setNewUser('');
+    } catch (err) {
+      setError(true);
+    }
+
     setLoading(false);
     Keyboard.dismiss();
   };
@@ -76,6 +98,7 @@ const Main = ({navigation}) => {
     <Container>
       <Form>
         <Input
+          error={error}
           autoCorrect={false}
           autoCapitalize="none"
           placeholder="Adicionar usuário"
