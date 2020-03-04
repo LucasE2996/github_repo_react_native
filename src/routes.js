@@ -5,6 +5,7 @@ import {createStackNavigator} from '@react-navigation/stack';
 
 import Main from './pages/Main';
 import User from './pages/User';
+import Detail from './pages/Detail';
 
 const Stack = createStackNavigator();
 
@@ -30,6 +31,7 @@ const Routes = () => {
           component={User}
           options={({route}) => ({title: route.params.user.name})}
         />
+        <Stack.Screen name="Detail" component={Detail} />
       </Stack.Navigator>
     </NavigationContainer>
   );

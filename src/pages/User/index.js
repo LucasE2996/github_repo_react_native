@@ -19,7 +19,8 @@ import {
   ErrorText,
 } from './styles';
 
-const User = ({route}) => {
+const User = ({route, navigation}) => {
+  console.log(route);
   // react-navigation v5 uses route object to hold params objects
   const {user} = route.params;
   const [stars, setStars] = useState([]);
@@ -43,6 +44,7 @@ const User = ({route}) => {
         if (response.data.length < 1) {
           setReachEnd(true);
         } else {
+          console.log(response.data);
           setStars(resetData ? response.data : [...stars, ...response.data]);
           setPage(prev => {
             const newValue = prev + 1;
@@ -51,7 +53,7 @@ const User = ({route}) => {
         }
       }
     } catch (err) {
-      console.error(err);
+      console.error('ERROR', err);
       setErrorPage(true);
     }
 
@@ -84,6 +86,10 @@ const User = ({route}) => {
     }, 500);
   };
 
+  const handleNavigateDetail = url => {
+    navigation.navigate('Detail', {html_url: url});
+  };
+
   return (
     <Container>
       <Header>
@@ -110,7 +116,7 @@ const User = ({route}) => {
             data={stars}
             keyExtractor={star => String(star.id)}
             renderItem={({item}) => (
-              <Starred>
+              <Starred onPress={() => handleNavigateDetail(item.html_url)}>
                 <OwnerAvatar source={{uri: item.owner.avatar_url}} />
                 <Info>
                   <Title>{item.name}</Title>
